@@ -1,0 +1,68 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <h1>Category: {{ category.category_name }}</h1>
+    {% if auctions %}
+        {% for auction in auctions %}
+            {% if auction.is_open %}
+            
+                <div class="card mb-3" style="max-width: 540px;">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                            <img src="{{ auction.image_url }}" class="img-fluid rounded-start">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <a href="{% url 'auction' auction.id %}"><h5 class="card-title">{{ auction.title }}</h5></a>
+                                <p class="card-text">{{ auction.description }}</p>
+                                
+                                {% with current_bid=auction.current_bid %}
+                                    {% if current_bid %}
+                                        <p class="card-text">
+                                            <small class="text-body-secondary">
+                                                <strong>Current bid: ${{ current_bid }}</strong>
+                                            </small>
+                                        </p>
+                                    {% else %}
+                                        <p class="card-text">
+                                            <small class="text-body-secondary">
+                                                <strong>No bids yet</strong> Minimum bid: {{auction.minimum_bid}}
+                                            </small>
+                                        </p>
+                                    {% endif %}
+                                {% endwith %}
+
+                                {% if auction.is_open %}
+                                
+                                    <p class="card-text">
+                                        <small class="text-body-secondary">
+                                            <strong style="color: green">Auction is active for bidding </strong>
+                                        </small>
+                                    </p>
+
+                                {% else %}
+                                
+                                    <p class="card-text">
+                                        <small class="text-body-secondary">
+                                            <strong style="color: red">Auction is closed </strong>
+                                        </small>
+                                    </p>
+
+                                {% endif %}
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+            {% endif %}
+        {% endfor %}
+
+    {% else %}
+        <h3> 
+            No auctions for this category
+        </h3>
+    {% endif %}
+
+{% endblock body %}

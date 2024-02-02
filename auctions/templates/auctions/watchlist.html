@@ -1,0 +1,60 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <h1> Your Watchlist: </h1>
+
+    {% for items in watchlist %}
+    
+        <div class="card mb-3" style="max-width: 540px;">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img src="{{ items.auction_id.image_url }}" class="img-fluid rounded-start">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <a href="{% url 'auction' items.auction_id.id %}"><h5 class="card-title">{{ items.auction_id.title }}</h5></a>
+                        <p class="card-text">{{ items.auction_id.description }}</p>
+                        
+                        {% with current_bid=items.auction.current_bid %}
+                            {% if items.current_bid %}
+                                <p class="card-text">
+                                    <small class="text-body-secondary">
+                                        <strong>Current bid: ${{ items.auction_id.current_bid }}</strong>
+                                    </small>
+                                </p>
+                            {% else %}
+                                <p class="card-text">
+                                    <small class="text-body-secondary">
+                                        <strong>No bids yet</strong> Minimum bid: {{items.auction_id.minimum_bid}}
+                                    </small>
+                                </p>
+                            {% endif %}
+                        {% endwith %}
+
+                        {% if items.auction_id.is_open %}
+                        
+                            <p class="card-text">
+                                <small class="text-body-secondary">
+                                    <strong style="color: green">Auction is active for bidding </strong>
+                                </small>
+                            </p>
+
+                        {% else %}
+                        
+                            <p class="card-text">
+                                <small class="text-body-secondary">
+                                    <strong style="color: red">Auction is closed </strong>
+                                </small>
+                            </p>
+
+                        {% endif %}
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endfor %}    
+
+{% endblock body %}

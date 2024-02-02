@@ -1,0 +1,191 @@
+{% extends "auctions/layout.html" %}
+
+
+{% block body %}
+
+    <h1>Listing: {{ auction.title }}</h1>
+    
+    {% if not auction.image_url %}
+        <img src="https://t4.ftcdn.net/jpg/04/73/25/49/360_F_473254957_bxG9yf4ly7OBO5I0O5KABlN930GwaMQz.jpg" alt="image" style="width: 500px; height: 500px;">
+    {% else %}
+        <img src="{{ auction.image_url }}" alt="image" style="width: 500px; height: 500px;">
+    {% endif %}
+    
+    <br>
+    {{ auction.description }}
+    <br>
+
+    {% if not auction.is_open %}
+
+        {% if not bid %}
+
+            <h2> Auction closed with no bids </h2>
+
+        {% else %}
+
+            {% if bid.user_id.id == user.id %}
+            
+                <h2>You won the bid with ${{ bid.price }}</h2>
+        
+            {% else %}
+
+                <h2>{{ bid.user_id }} won the bid with ${{ bid.price }}</h2>
+
+            {% endif %}
+
+        {% endif %}
+
+    {% else %}
+
+        {% if bid %}
+
+            <h2>Bid: {{bid.user_id}} with ${{ bid.price }}</h2>
+
+        {% else %}
+
+            <h2>No bid yet</h2>
+            <p> Minimum Bid: ${{ auction.minimum_bid }} </p>
+
+        {% endif %}
+
+    {% endif %}
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}><strong>{{ message }}</strong></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if user.is_authenticated and user.id != auction.user_id.id %}
+
+        {% if auction.is_open %}
+            
+            <form action="{% url 'placebid' user.id auction.id %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input type="text" name="price" placeholder="Bid">
+                </div>
+                <input class="btn btn-primary" type="submit" value="Place Bid">
+            </form>
+            <br>
+
+        {% endif %}
+        
+    {% endif %}
+
+    <h3> Details </h3>
+    <ul>
+        <li> Listed by: {{ auction.user_id.username }} </li>
+        {% if auction.category_id is not None %}
+            <li> Category: {{ auction.category_id.category_name }} </li>
+        {% else %}
+            <li> Category: This auction has no category </li>
+        {% endif %}
+    </ul>
+    
+    {% if auction.is_open %}
+
+        {% if user.is_authenticated and user.id != auction.user_id.id %}
+
+            {% if not is_watched %}
+
+                <form action="{% url 'watch' user.id auction.id %}" method="post">
+                    {% csrf_token %}
+                    <input class="btn btn-primary" type="submit" value="Watch">
+                </form>
+
+            {% else %}
+                
+                <form action="{% url 'unwatch' user.id auction.id %}" method="post">
+                    {% csrf_token %}
+                    <input class="btn btn-warning" type="submit" value="Unwatch">
+                </form>
+            
+            {% endif %}
+
+        {% endif %}
+    
+    {% endif %}
+
+    {% if user.is_authenticated and user.id == auction.user_id.id %}
+            
+            {% if auction.is_open %}
+            
+                <form action="{% url 'close' user.id auction.id %}" method="post">
+                    {% csrf_token %}
+                    <input class="btn btn-warning" type="submit" value="Close Auction">
+                </form>
+                <br> 
+
+            {% endif %}     
+
+    {% endif %}
+
+    {% if user.is_authenticated %}
+
+        <br>
+        <button class="btn btn-primary" id="showCommentFieldBtn">Add Comment</button>
+        <br>
+
+            
+        <br>
+            
+        <div id="commentField" style="display: none;">
+            <form action="{% url 'comment' user.id auction.id %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <textarea name="comment" placeholder="Add your comment" style="width: 50%; height:100px; "></textarea>
+                </div>
+                <input class="btn btn-primary" type="submit" value="Submit Comment">
+            </form>
+        </div>
+            
+    {% endif %}
+        
+        <h3> Comments section: </h3>
+
+        {% if not comments %}
+        
+            <h5> There's no comments for this auction yet </h5>
+
+        {% else %}
+
+            {% for comment in comments %}
+                
+                <div class="container py-3 text-dark">
+                    <div class="col-md-11 col-lg-9 col-xl-7">
+                        <div class="card w-100">
+                            <div class="card-body p-4">
+                                <div class="">
+                                    <h5>{{ comment.user_id.username }}</h5>
+                                    <p>
+                                        {{ comment.comment }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+
+        <script>
+            var commentField = document.getElementById('commentField');
+
+            document.getElementById('showCommentFieldBtn').addEventListener('click', function () {
+                if (commentField.style.display === 'none' || commentField.style.display === '') {
+                    commentField.style.display = 'block';
+                } else {
+                    commentField.style.display = 'none';
+                }
+            });
+        </script>
+
+{% endblock body %}
+
+
